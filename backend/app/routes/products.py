@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import Optional, List
 
 from app.database import get_db
-from app.models.db_models import Product, Category
-from app.models.schemas import ProductOut, CategoryOut
+from app.models.db_models import Product, Category, Recommendation
+from app.models.schemas import ProductOut, CategoryOut, RecommendationOut
 
 router = APIRouter()
 
@@ -35,7 +36,11 @@ def search_products(
     limit: int = Query(20, le=100),
     db: Session = Depends(get_db),
 ):
-    """Simple keyword search over product category names."""
+    """
+    Simple keyword search over product category names.
+    (Day 6 will add real semantic search using embeddings —
+    this is the basic keyword version for now.)
+    """
     results = (
         db.query(Product)
         .filter(Product.product_category_name.ilike(f"%{q}%"))
@@ -52,3 +57,24 @@ def get_product(product_id: str, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
+
+
+@router.get("/{product_id}/recommendations", response_model=List[RecommendationOut])
+def get_recommendations(
+    product_id: str,
+    method: Optional[str] = Query(
+        None, description="Filter by method: 'collaborative' or 'content'. Omit for both."
+    ),
+    limit: int = Query(10, le=50),
+    db: Session = Depends(get_db),
+):
+    """
+    Get recommended products for a given product_id.
+    - method='collaborative': based on co-purchase patterns
+    - method='content': based on category/attribute similarity
+    - omitted: returns both, sorted by score
+    """
+    query = db.query(Recommendation).filter(Recommendation.product_id == product_id)
+    if method:
+        query = query.filter(Recommendation.method == method)
+    return query.order_by(Recommendation.score.desc()).limit(limit).all()

@@ -54,3 +54,12 @@ class TopProductOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class RecommendationOut(BaseModel):
+    recommended_product_id: str
+    method: str
+    score: float
+
+    class Config:
+        from_attributes = True

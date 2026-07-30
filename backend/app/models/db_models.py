@@ -91,3 +91,14 @@ class ReviewSentimentAnalytics(Base):
     product_category_name = Column(String(100), primary_key=True)
     avg_review_score = Column(DECIMAL(3, 2))
     total_reviews = Column(Integer)
+
+
+# ---------------------------------------------------------
+# Recommendations (Day 5)
+# ---------------------------------------------------------
+class Recommendation(Base):
+    __tablename__ = "recommendations"
+    product_id = Column(String(64), primary_key=True)
+    recommended_product_id = Column(String(64), primary_key=True)
+    method = Column(String(20), primary_key=True)
+    score = Column(DECIMAL(10, 4))
