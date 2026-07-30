@@ -6,6 +6,7 @@ from typing import Optional, List
 from app.database import get_db
 from app.models.db_models import Product, Category, Recommendation
 from app.models.schemas import ProductOut, CategoryOut, RecommendationOut
+from app.services.embedding_service import search_categories
 
 router = APIRouter()
 
@@ -48,6 +49,33 @@ def search_products(
         .all()
     )
     return results
+
+
+@router.get("/semantic-search", response_model=List[ProductOut])
+def semantic_search(
+    q: str = Query(..., min_length=1, description="Natural language search query, e.g. 'gift for outdoor fitness'"),
+    top_categories: int = Query(2, le=5, description="How many matching categories to pull products from"),
+    limit: int = Query(20, le=100),
+    db: Session = Depends(get_db),
+):
+    """
+    DL-powered semantic search: embeds the query text and matches it
+    against category embeddings by meaning, not just keyword overlap.
+    Then returns products from the best-matching categories.
+    """
+    matched_categories = search_categories(q, db, top_k=top_categories)
+    category_names = [c["product_category_name"] for c in matched_categories]
+
+    if not category_names:
+        return []
+
+    products = (
+        db.query(Product)
+        .filter(Product.product_category_name.in_(category_names))
+        .limit(limit)
+        .all()
+    )
+    return products
 
 
 @router.get("/{product_id}", response_model=ProductOut)

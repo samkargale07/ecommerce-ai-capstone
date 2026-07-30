@@ -5,7 +5,7 @@ Run with: uvicorn app.main:app --reload
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import products, analytics
+from app.routes import products, analytics, chat
 
 app = FastAPI(
     title="E-commerce AI Assistant API",
@@ -13,6 +13,8 @@ app = FastAPI(
     version="0.1.0",
 )
 
+# Allow the frontend (running on a different port) to call this API.
+# Tighten allow_origins to your actual frontend URL before deploying.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,3 +30,5 @@ def health_check():
 
 app.include_router(products.router, prefix="/products", tags=["products"])
 app.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+app.include_router(chat.router, prefix="/chat", tags=["chat"])
+
