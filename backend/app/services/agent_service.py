@@ -207,20 +207,36 @@ def run_agent(query: str) -> dict:
             "tools_available": [],
         }
 
-    response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents=query,
-        config=types.GenerateContentConfig(
-            system_instruction=AGENT_SYSTEM_PROMPT,
-            tools=[search_products, get_recommendations, get_category_stats, compare_products],
-            max_output_tokens=2048,
-            thinking_config=types.ThinkingConfig(thinking_budget=0),
-        ),
-    )
+    try:
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=query,
+            config=types.GenerateContentConfig(
+                system_instruction=AGENT_SYSTEM_PROMPT,
+                tools=[search_products, get_recommendations, get_category_stats, compare_products],
+                max_output_tokens=2048,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+            ),
+        )
+        answer_text = response.text
+    except Exception as e:
+        error_str = str(e)
+        if "503" in error_str or "UNAVAILABLE" in error_str or "high demand" in error_str.lower():
+            answer_text = (
+                "The AI service is temporarily overloaded (this is common on free tiers "
+                "during peak times). Please wait a moment and try again."
+            )
+        elif "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+            answer_text = (
+                "The free tier's rate limit was hit for this API key. Please wait a "
+                "minute before trying again."
+            )
+        else:
+            answer_text = f"An unexpected error occurred while contacting the AI service: {error_str}"
 
     return {
         "query": query,
-        "answer": response.text,
+        "answer": answer_text,
         "tools_available": [
             "search_products", "get_recommendations", "get_category_stats", "compare_products"
         ],
