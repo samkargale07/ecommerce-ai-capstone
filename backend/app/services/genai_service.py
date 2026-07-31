@@ -4,14 +4,18 @@ GenAI Service — Retrieval-Augmented Generation (RAG)
 Given a natural-language question, this:
 1. RETRIEVES relevant context from our own data (semantic category search
    + real product listings + category sales stats)
-2. AUGMENTS a prompt to Claude with that real, grounded context
+2. AUGMENTS a prompt to Gemini with that real, grounded context
 3. GENERATES a natural-language answer based on it
+
+Uses Google's Gemini API (free tier — no credit card needed), via the
+official `google-genai` SDK.
 
 This is deliberately simple/single-turn — Day 9's Agentic AI layer will
 build on top of this with multi-step reasoning and tool selection.
 """
 import os
-import anthropic
+from google import genai
+from google.genai import types
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from dotenv import load_dotenv
@@ -20,10 +24,10 @@ from app.services.embedding_service import search_categories
 
 load_dotenv()
 
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-MODEL_NAME = "claude-haiku-4-5-20251001"  # fast + cost-effective, good fit for this use case
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+MODEL_NAME = "gemini-3.5-flash"  # strong quality, generous free tier
 
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY) if ANTHROPIC_API_KEY else None
+client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
 
 def retrieve_context(query: str, db: Session, top_categories: int = 2, products_per_category: int = 5) -> str:
@@ -78,11 +82,11 @@ def retrieve_context(query: str, db: Session, top_categories: int = 2, products_
 
 
 def generate_answer(query: str, context: str) -> str:
-    """Sends the query + retrieved context to Claude and returns its answer."""
+    """Sends the query + retrieved context to Gemini and returns its answer."""
     if not client:
         return (
-            "GenAI is not configured — ANTHROPIC_API_KEY is missing from .env. "
-            "Add your API key from console.anthropic.com to enable this feature."
+            "GenAI is not configured — GEMINI_API_KEY is missing from .env. "
+            "Get a free key from aistudio.google.com and add it to enable this feature."
         )
 
     system_prompt = (
@@ -94,14 +98,17 @@ def generate_answer(query: str, context: str) -> str:
         f"PRODUCT CONTEXT:\n{context}"
     )
 
-    response = client.messages.create(
+    response = client.models.generate_content(
         model=MODEL_NAME,
-        max_tokens=500,
-        system=system_prompt,
-        messages=[{"role": "user", "content": query}],
+        contents=query,
+        config=types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            max_output_tokens=2048,
+            thinking_config=types.ThinkingConfig(thinking_budget=0),
+        ),
     )
 
-    return response.content[0].text
+    return response.text
 
 
 def answer_question(query: str, db: Session) -> dict:
@@ -109,3 +116,4 @@ def answer_question(query: str, db: Session) -> dict:
     context = retrieve_context(query, db)
     answer = generate_answer(query, context)
     return {"query": query, "context_used": context, "answer": answer}
+
