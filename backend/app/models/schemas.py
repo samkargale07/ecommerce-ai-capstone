@@ -10,6 +10,7 @@ from typing import Optional
 class ProductOut(BaseModel):
     product_id: str
     product_category_name: Optional[str]
+    product_category_name_english: Optional[str] = None
     product_weight_g: Optional[int]
     product_length_cm: Optional[int]
     product_height_cm: Optional[int]

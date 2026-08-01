@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --paper: #fbf8f3;
+  --ink: #1b1b1b;
+  --ink-soft: #5a5750;
+  --primary: #0f6b5c;
+  --primary-dark: #0a4c41;
+  --accent: #f2734a;
+  --sand: #e8e1d3;
+  --sand-line: #d9d0bd;
+  --mint: #cfe8de;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+}
+
+.font-mono-data {
+  font-family: var(--font-plex-mono), monospace;
+}
+
+.product-id-tag {
+  font-family: var(--font-plex-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  background: var(--sand);
+  color: var(--ink-soft);
+  border: 1px solid var(--sand-line);
+  border-radius: 3px;
+  padding: 2px 6px;
+  display: inline-block;
+}
+
+::selection {
+  background: var(--mint);
+  color: var(--primary-dark);
 }
