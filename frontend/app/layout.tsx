@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
+import ChatWidget from "./components/ChatWidget";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -44,6 +45,7 @@ export default function RootLayout({
           </div>
         </header>
         <main>{children}</main>
+        <ChatWidget />
       </body>
     </html>
   );

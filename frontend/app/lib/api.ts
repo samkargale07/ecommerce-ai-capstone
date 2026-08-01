@@ -33,6 +33,12 @@ async function apiFetch<T>(path: string): Promise<T> {
   return res.json();
 }
 
+export interface AgentResponse {
+  query: string;
+  answer: string;
+  tools_available: string[];
+}
+
 export function getProducts(limit = 24, category?: string): Promise<Product[]> {
   const params = new URLSearchParams({ limit: String(limit) });
   if (category) params.set("category", category);
@@ -54,4 +60,9 @@ export function getRecommendations(id: string): Promise<Recommendation[]> {
 export function searchProducts(query: string, limit = 24): Promise<Product[]> {
   const params = new URLSearchParams({ q: query, limit: String(limit) });
   return apiFetch<Product[]>(`/products/semantic-search?${params.toString()}`);
+}
+
+export function askAgent(query: string): Promise<AgentResponse> {
+  const params = new URLSearchParams({ q: query });
+  return apiFetch<AgentResponse>(`/agent/?${params.toString()}`);
 }

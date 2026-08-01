@@ -38,6 +38,36 @@ body {
   display: inline-block;
 }
 
+.markdown-content p {
+  margin-bottom: 0.6em;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 1.2em;
+  margin-bottom: 0.6em;
+}
+
+.markdown-content ul {
+  list-style: disc;
+}
+
+.markdown-content ol {
+  list-style: decimal;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+}
+
+.markdown-content li {
+  margin-bottom: 0.2em;
+}
+
 ::selection {
   background: var(--mint);
   color: var(--primary-dark);
