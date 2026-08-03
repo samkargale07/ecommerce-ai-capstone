@@ -62,6 +62,38 @@ export function searchProducts(query: string, limit = 24): Promise<Product[]> {
   return apiFetch<Product[]>(`/products/semantic-search?${params.toString()}`);
 }
 
+export interface CategorySales {
+  product_category_name: string;
+  total_orders: number;
+  total_revenue: number;
+  avg_order_value: number;
+}
+
+export interface MonthlyTrend {
+  sales_month: string;
+  total_orders: number;
+  total_revenue: number;
+}
+
+export interface TopProduct {
+  product_id: string;
+  product_category_name: string | null;
+  total_quantity_sold: number;
+  total_revenue: number;
+}
+
+export function getCategorySales(): Promise<CategorySales[]> {
+  return apiFetch<CategorySales[]>(`/analytics/category-sales`);
+}
+
+export function getMonthlyTrends(): Promise<MonthlyTrend[]> {
+  return apiFetch<MonthlyTrend[]>(`/analytics/monthly-trends`);
+}
+
+export function getTopProducts(limit = 10): Promise<TopProduct[]> {
+  return apiFetch<TopProduct[]>(`/analytics/top-products?limit=${limit}`);
+}
+
 export function askAgent(query: string): Promise<AgentResponse> {
   const params = new URLSearchParams({ q: query });
   return apiFetch<AgentResponse>(`/agent/?${params.toString()}`);

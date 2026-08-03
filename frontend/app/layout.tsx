@@ -41,6 +41,7 @@ export default function RootLayout({
             </Link>
             <nav className="flex gap-6 text-sm" style={{ color: "var(--ink-soft)" }}>
               <Link href="/" className="hover:underline">Catalog</Link>
+              <Link href="/dashboard" className="hover:underline">Dashboard</Link>
             </nav>
           </div>
         </header>
